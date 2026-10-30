@@ -28,3 +28,10 @@
 | S010 | AI Risk Management Framework 1.0；自愿性框架，不替代适用要求 | NIST | 2023 | [官方出版页](https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-ai-rmf-10) | 03、08 | 已核实 2026-10-30 |
 | S011 | Training language models to follow instructions with human feedback；特定模型适配研究 | Ouyang 等 | 2022 | [原论文](https://arxiv.org/abs/2203.02155) | 01 | 已核实 2026-10-30 |
 | S012 | Robotic Process Automation；供应商对 RPA 的介绍，可能包含推广内容 | UiPath | 未注明 | [官方介绍](https://www.uipath.com/rpa/robotic-process-automation) | 01 | 已核实 2026-10-30 |
+| S013 | AskIBM；IBM 对其内部项目的自述，披露建设与开放范围，未给出可核验的生产率对照结果 | IBM | 页面版权标注 2024 | [IBM 官方案例](https://www.ibm.com/case-studies/askibm) | 05 | 已核实 2026-10-30 |
+| S014 | An Evaluation of DWP’s Microsoft 365 Copilot Trial；对试验的自报调查和非随机对照回归分析，不能直接外推 | 英国就业与养老金部 | 2026 | [GOV.UK 官方评估](https://www.gov.uk/government/publications/an-evaluation-of-dwps-microsoft-copilot-365-trial/an-evaluation-of-dwps-microsoft-365-copilot-trial) | 05 | 已核实 2026-10-30 |
+| S015 | D3 Treemap；层级矩形布局与坐标计算的官方文档 | D3 | 持续更新 | [官方文档](https://d3js.org/d3-hierarchy/treemap) | 01 | 已核实 2026-10-30 |
+| S016 | Create a treemap chart in Office；Excel 树图及图表格式说明 | Microsoft | 持续更新 | [官方支持文档](https://support.microsoft.com/en-us/excel/create-a-treemap-chart-in-office) | 01 | 已核实 2026-10-30 |
+| S017 | FAQ about Google Trends data；搜索样本及归一化说明 | Google | 持续更新 | [官方帮助](https://support.google.com/trends/answer/4365533?hl=en-GB) | 01 | 已核实 2026-10-30 |
+| S018 | 百度指数帮助；搜索指数及数据口径说明 | 百度 | 持续更新 | [官方帮助](https://index.baidu.com/Helper) | 01 | 已核实 2026-10-30 |
+| S019 | Change the data in an existing chart；PowerPoint 图表数据编辑说明，具体树图版本与嵌入方式仍需测试 | Microsoft | 持续更新 | [官方支持文档](https://support.microsoft.com/en-gb/powerpoint/change-the-data-in-an-existing-chart) | 01 | 已核实 2026-10-30 |

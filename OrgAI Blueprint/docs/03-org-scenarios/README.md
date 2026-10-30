@@ -23,14 +23,19 @@
 | 05 | 05-nonprofit.md | 非营利组织 | 说明资金有限、志愿者参与条件下适合的低成本场景，以及捐赠方透明度要求。 |
 | 06 | [06-prioritization.md](06-prioritization.md) | 场景优先级评估方法 | 先审查风险门槛，再说明价值、可行性的评分及试点决策。 |
 
-> 已有场景优先级方法初稿；其余五个小节正文与场景卡待撰写。
+已有场景优先级方法及两张通用示意场景卡：
+
+- [内部知识查询](scenarios/01-knowledge-assistant.md)
+- [文档字段处理](scenarios/02-document-processing.md)
+
+五个按职能、行业和组织类型展开的小节仍待撰写。
 
 ## 与其他章节的关系
 
 - 场景基于 [02 AI 应用全景](../02-application-landscape/README.md) 的应用形态，所需技术链接 [01 AI 技术全景](../01-tech-landscape/README.md)。
 - 选定场景后进入 [04 实施与部署](../04-implementation/README.md)。
 - 场景的参考案例来自 [05 案例](../05-cases/README.md)，预期指标参照 [06 效果评估](../06-evaluation/README.md) 的指标库。
-- 风险评分参照 [08 治理与合规](../08-governance/README.md) 的风险框架。
+- 风险门槛审查参照 [08 治理与合规](../08-governance/README.md) 的风险框架。
 
 ## 不同组织类型的差异
 
@@ -50,4 +55,4 @@
 
 ## 状态
 
-部分初稿：优先级方法已撰写，其余为骨架。
+部分初稿：优先级方法与两张场景卡已撰写，其余专题为骨架。
