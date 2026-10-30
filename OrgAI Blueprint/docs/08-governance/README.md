@@ -35,7 +35,7 @@
 
 ## 与其他章节的关系
 
-- 风险框架为 [03 组织应用场景](../03-org-scenarios/README.md) 的优先级评估提供风险评分依据。
+- 风险框架为 [03 组织应用场景](../03-org-scenarios/README.md) 的优先级评估提供风险门槛审查依据。
 - 部署方式的合规约束与 [01 AI 技术全景](../01-tech-landscape/README.md) 和 [04 实施与部署](../04-implementation/README.md) 的部署选型衔接。
 - 模型风险管理与 [06 效果评估](../06-evaluation/README.md) 的模型效果评估衔接。
 - 内部制度模板是 [07 组织转型](../07-transformation/README.md) 中文化与规范建设的组成部分。
