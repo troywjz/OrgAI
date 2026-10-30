@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 技术全景 · 矩形树图试验</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b111c; --panel:#141e2c; --line:#354255; --text:#eef3f9; --muted:#acbbcc; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:14px/1.5 system-ui,"Microsoft YaHei",sans-serif; }
+    header { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:14px; padding:20px 24px 12px; }
+    h1 { margin:0; font-size:23px; letter-spacing:.02em; }
+    header p { margin:4px 0 0; color:var(--muted); }
+    .toolbar { display:flex; flex-wrap:wrap; gap:7px; }
+    button, .file { color:var(--text); background:#1c2a3c; border:1px solid #465a73; border-radius:5px; padding:7px 11px; font:inherit; cursor:pointer; }
+    button:hover, .file:hover { background:#2c3e54; }
+    button:focus-visible, input:focus-visible, .file:focus-within { outline:2px solid #a5d6fb; outline-offset:2px; }
+    .file input { position:absolute; width:1px; height:1px; opacity:0; }
+    .notice { margin:0 24px 10px; padding:9px 12px; color:#ffe5b1; background:#3b2b1b; border:1px solid #795a30; border-radius:4px; }
+    .legend { display:flex; align-items:center; flex-wrap:wrap; gap:9px; padding:0 24px 12px; color:var(--muted); }
+    .legend .grad { width:142px; height:10px; border-radius:5px; background:linear-gradient(90deg,#315174,#388788,#83a15a,#d69742,#d65b54); }
+    .legend input { width:52px; color:var(--text); background:#101a28; border:1px solid #465a73; border-radius:4px; padding:3px; font:inherit; }
+    main { padding:0 24px; }
+    .map { height:min(65vh,720px); min-height:440px; position:relative; overflow:hidden; background:#101a28; }
+    .group { position:absolute; overflow:hidden; box-shadow:inset 0 0 0 2px #c8d7e9; }
+    .group-label { position:absolute; z-index:3; top:3px; left:3px; max-width:calc(100% - 6px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:3px 7px; font-size:13px; font-weight:700; color:#fff; background:#101924d9; }
+    .tile { position:absolute; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:2px; min-width:0; min-height:0; overflow:hidden; padding:3px; border:1px solid #121c2c; border-radius:0; background:var(--tile-color); color:#fff; text-align:center; text-shadow:0 1px 2px #101520; }
+    .tile:hover, .tile:focus-visible { z-index:2; outline:2px solid #fff; outline-offset:-3px; background:var(--tile-color); }
+    .tile-name { max-width:100%; font-size:clamp(11px,1.12vw,17px); font-weight:700; line-height:1.2; overflow:hidden; text-overflow:ellipsis; }
+    .tile-score { font-size:11px; opacity:.95; white-space:nowrap; }
+    .empty { padding:35px 10px 8px; color:var(--muted); }
+    .selected { min-height:42px; padding:10px 24px 12px; color:#d9e4f1; }
+    .selected strong { color:#fff; }
+    .editor { margin:0 24px 24px; background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px; }
+    .editor summary { cursor:pointer; font-size:15px; font-weight:700; }
+    .hint, .status { color:var(--muted); font-size:12px; margin:8px 0; }
+    .categories { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr)); gap:10px; margin-top:10px; }
+    .editcat { min-width:0; border:1px solid var(--line); border-radius:5px; padding:9px; }
+    .editcat h3 { font-size:14px; margin:0 0 7px; }
+    .row { display:grid; grid-template-columns:minmax(92px,1.5fr) 54px 54px minmax(90px,2fr) auto; gap:5px; align-items:center; margin:5px 0; }
+    .row input { min-width:0; width:100%; background:#0b1320; color:var(--text); border:1px solid #465a73; border-radius:3px; padding:5px; font:inherit; }
+    .row .del { padding:4px 7px; }
+    .catbuttons { display:flex; gap:5px; margin-top:8px; }
+    .catbuttons button { padding:4px 8px; }
+    @media(max-width:700px) {
+      header { padding:16px 12px 10px; }
+      main { padding:0 10px; }
+      .notice { margin:0 10px 10px; }
+      .legend { padding:0 10px 10px; }
+      .map { height:60vh; min-height:380px; }
+      .group-label { font-size:11px; padding:2px 4px; }
+      .tile-name { font-size:11px; }
+      .tile-score { font-size:10px; }
+      .selected { padding:10px; }
+      .editor { margin:0 10px 18px; }
+      .row { grid-template-columns:minmax(70px,1.1fr) 45px 45px minmax(70px,1.5fr) auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div><h1>组织 AI 技术全景</h1><p><span id="groupCount">五个板块</span> · 面积按热度与应用价值分配 · 点击方块查看说明</p></div>
+    <div class="toolbar">
+      <button type="button" id="addCat">＋ 添加板块</button>
+      <button type="button" id="export">导出 JSON</button>
+      <label class="file">导入 JSON<input id="import" type="file" accept="application/json,.json"></label>
+      <button type="button" id="reset">恢复示意数据</button>
+    </div>
+  </header>
+  <div class="notice"><strong>试验示意：</strong>所有评分均为虚构，仅用于测试分类、布局和编辑；不是实时热度、市场份额或实际效果。</div>
+  <div class="legend">
+    <span>颜色：热度</span><span>低</span><span class="grad" aria-hidden="true"></span><span>高</span>
+    <span>｜面积权重：热度</span><label><input id="heatWeight" type="number" min="0" max="100" step="0.01" value="40" aria-label="热度权重百分比"> %</label>
+    <span id="valueWeight">应用价值 60%</span>
+  </div>
+  <main><div id="map" class="map" role="group" aria-label="AI 技术矩形树图"></div></main>
+  <div id="selected" class="selected" aria-live="polite">点击或悬停方块可查看定义、示意评分和面积占比。</div>
+  <details id="editor" class="editor" open>
+    <summary>编辑板块与技术模块</summary>
+    <p class="hint">每行依次为：名称、热度、应用价值、说明、删除；评分范围为 1–5。修改后即时重排；页面不自动保存，请导出 JSON 留存。</p>
+    <div id="categories" class="categories"></div>
+    <p id="status" class="status" role="status">在本地浏览器打开即可离线使用；移动或分享时请保留同目录的数据与布局文件。</p>
+    <p class="hint">板块标题覆盖在矩形上以保留计算面积；细边框和文字覆盖可能带来轻微视觉误差。占比显示到一位小数，合计可能因四舍五入而略有偏差。</p>
+  </details>
+  <script src="ai-treemap-demo-data.js"></script>
+  <script src="ai-treemap-layout.js"></script>
+  <script>
+  (() => {
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const clone = value => JSON.parse(JSON.stringify(value));
+    const seed = clone(globalThis.ORG_AI_TREEMAP_DEMO);
+    const engine = globalThis.OrgAITreemapLayout;
+    let data = clone(seed);
+    let currentSelection = null;
+    const colors = ['#315174','#388788','#83a15a','#d69742','#d65b54'];
+
+    function validate(candidate) {
+      if (!candidate || !Array.isArray(candidate.categories)) throw new Error('数据需要 categories 数组。');
+      if (candidate.categories.length > 50) throw new Error('板块数量不能超过 50 个。');
+      engine.getWeights(candidate);
+      const normalizeItem = (item, kind) => {
+        if (!item || typeof item.name !== 'string' || !item.name.trim()) throw new Error(kind + '名称不能为空。');
+        const heat = Number(item.heat), value = Number(item.value);
+        if (!Number.isFinite(heat) || heat < 1 || heat > 5 || !Number.isFinite(value) || value < 1 || value > 5) {
+          throw new Error('热度和应用价值必须在 1–5 之间。');
+        }
+        return { ...item, name:item.name.trim().slice(0,100), heat, value,
+          description: typeof item.description === 'string' ? item.description.slice(0,1000) : '' };
+      };
+      return { ...candidate, categories:candidate.categories.map(group => {
+        const cleanGroup = normalizeItem(group, '板块');
+        if (!Array.isArray(group.children)) throw new Error('每个板块需要 children 数组。');
+        if (group.children.length > 100) throw new Error('每个板块的技术模块不能超过 100 个。');
+        cleanGroup.children = group.children.map(item => normalizeItem(item, '技术'));
+        return cleanGroup;
+      }) };
+    }
+
+    function showSelected(group, rect) {
+      const item = rect.item;
+      const summary = $('selected');
+      summary.replaceChildren();
+      const heading = document.createElement('strong');
+      heading.textContent = (item.name || '未命名') + '　';
+      summary.append(heading);
+      summary.append(document.createTextNode(
+        (item.description || '暂无说明。') + '　｜　' + group.item.name +
+        ' · 热度 ' + item.heat + '/5 · 价值 ' + item.value + '/5 · 总图 ' + (rect.totalShare * 100).toFixed(1) + '%（均为示意）'
+      ));
+    }
+
+    function renderMap() {
+      const map = $('map');
+      map.replaceChildren();
+      const weights = engine.getWeights(data);
+      $('groupCount').textContent = data.categories.length + ' 个板块';
+      $('heatWeight').value = Math.round(weights.heat * 10000) / 100;
+      $('valueWeight').textContent = '应用价值 ' + (Math.round(weights.value * 10000) / 100) + '%';
+      const groups = engine.layout(data, map.clientWidth, map.clientHeight);
+      if (!groups.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty'; empty.textContent = '暂无板块，请添加板块。'; map.append(empty);
+        return;
+      }
+      for (const group of groups) {
+        const box = document.createElement('section');
+        box.className = 'group';
+        Object.assign(box.style, { left:group.x+'px', top:group.y+'px', width:group.width+'px', height:group.height+'px' });
+        const title = document.createElement('div');
+        title.className = 'group-label';
+        title.textContent = (group.item.name || '未命名板块') + '　' + (group.totalShare * 100).toFixed(1) + '%';
+        title.title = '板块总图占比：' + (group.totalShare * 100).toFixed(1) + '%';
+        box.append(title);
+        if (!group.children.length) {
+          const empty = document.createElement('div'); empty.className='empty'; empty.textContent='暂无技术模块'; box.append(empty);
+        }
+        for (const rect of group.children) {
+          const item = rect.item;
+          const tile = document.createElement('button');
+          tile.type='button'; tile.className='tile';
+          tile.dataset.groupId = group.item.id || group.item.name;
+          tile.dataset.itemId = item.id || item.name;
+          tile.dataset.totalShare = String(rect.totalShare);
+          Object.assign(tile.style, { left:rect.x+'px', top:rect.y+'px', width:rect.width+'px', height:rect.height+'px' });
+          tile.style.setProperty('--tile-color', colors[Math.max(0, Math.min(4, Math.round(item.heat)-1))]);
+          const description = (item.name || '未命名') + '：' + (item.description || '暂无说明。') +
+            ' 热度 ' + item.heat + '/5，价值 ' + item.value + '/5，总图占比 ' + (rect.totalShare*100).toFixed(1) + '%。示意数据。';
+          tile.title=description; tile.setAttribute('aria-label', description);
+          if (rect.width >= 48 && rect.height >= 32) {
+            const name = document.createElement('span'); name.className='tile-name'; name.textContent=item.name || '未命名'; tile.append(name);
+          }
+          if (rect.width >= 72 && rect.height >= 58) {
+            const label = document.createElement('span'); label.className='tile-score'; label.textContent=(rect.totalShare*100).toFixed(1)+'%'; tile.append(label);
+          }
+          tile.addEventListener('click', () => { currentSelection = { group, rect }; showSelected(group, rect); });
+          tile.addEventListener('mouseenter', () => showSelected(group, rect));
+          tile.addEventListener('focus', () => showSelected(group, rect));
+          box.append(tile);
+        }
+        map.append(box);
+      }
+      if (currentSelection) {
+        const group = groups.find(g => g.item === currentSelection.group.item);
+        const rect = group?.children.find(c => c.item === currentSelection.rect.item);
+        if (group && rect) { currentSelection={group,rect}; showSelected(group,rect); }
+        else currentSelection=null;
+      }
+    }
+
+    function inputFor(item, key, label, kind) {
+      const input = document.createElement('input');
+      input.value = item[key] ?? '';
+      input.setAttribute('aria-label', kind + '的' + label);
+      input.title = label;
+      if (key === 'heat' || key === 'value') {
+        input.type='number'; input.min='1'; input.max='5'; input.step='0.1';
+        input.addEventListener('change', () => {
+          const next = Number(input.value);
+          if (!input.value.trim() || !Number.isFinite(next) || next < 1 || next > 5) {
+            $('status').textContent='评分必须在 1–5 之间，已保留原值。'; input.value=item[key]; return;
+          }
+          item[key]=next; $('status').textContent='评分已更新；导出 JSON 可保存修改。'; renderMap();
+        });
+      } else {
+        input.maxLength = key === 'name' ? 100 : 1000;
+        if (key === 'description') input.placeholder='定义 / 说明';
+        input.addEventListener('input', () => { item[key]=input.value; renderMap(); });
+      }
+      return input;
+    }
+
+    function row(item, kind, onDelete) {
+      const row = document.createElement('div'); row.className='row';
+      row.append(inputFor(item,'name','名称',kind), inputFor(item,'heat','热度',kind),
+        inputFor(item,'value','应用价值',kind), inputFor(item,'description','说明',kind));
+      const del = document.createElement('button'); del.type='button'; del.className='del'; del.textContent='×';
+      del.setAttribute('aria-label','删除'+kind+' '+item.name);
+      del.addEventListener('click', onDelete); row.append(del);
+      return row;
+    }
+
+    function renderEditor() {
+      const root = $('categories'); root.replaceChildren();
+      data.categories.forEach((group, groupIndex) => {
+        const card = document.createElement('div'); card.className='editcat';
+        const heading = document.createElement('h3'); heading.textContent='板块 '+(groupIndex+1); card.append(heading);
+        card.append(row(group,'板块',() => { data.categories.splice(groupIndex,1); renderAll(); }));
+        group.children.forEach((item,itemIndex) => card.append(row(item,'技术',() => {
+          group.children.splice(itemIndex,1); renderAll();
+        })));
+        const actions = document.createElement('div'); actions.className='catbuttons';
+        const add = document.createElement('button'); add.type='button'; add.textContent='＋ 技术';
+        add.addEventListener('click', () => {
+          group.children.push({ id:'item-'+Date.now()+'-'+Math.random().toString(36).slice(2,7), name:'新技术', heat:3, value:3, description:'' });
+          renderAll();
+        });
+        actions.append(add); card.append(actions); root.append(card);
+      });
+    }
+
+    function renderAll() {
+      currentSelection=null;
+      $('selected').textContent='点击或悬停方块可查看定义、示意评分和面积占比。';
+      renderMap(); renderEditor();
+    }
+    $('addCat').addEventListener('click', () => {
+      data.categories.push({ id:'group-'+Date.now(), name:'新板块', heat:3, value:3, description:'', children:[] });
+      renderAll();
+    });
+    $('heatWeight').addEventListener('change', event => {
+      const value = Number(event.target.value);
+      if (!event.target.value.trim() || !Number.isFinite(value) || value < 0 || value > 100) {
+        $('status').textContent='热度权重必须在 0–100% 之间，已保留原值。'; renderMap(); return;
+      }
+      data.weights = { heat:value/100, value:(100-value)/100 };
+      $('status').textContent='权重已更新；导出 JSON 可保存修改。'; renderMap();
+    });
+    $('reset').addEventListener('click', () => {
+      if (confirm('恢复示意数据会清除尚未导出的修改，是否继续？')) { data=clone(seed); renderAll(); $('status').textContent='已恢复示意数据。'; }
+    });
+    $('export').addEventListener('click', () => {
+      try {
+        const clean = validate(data);
+        const url=URL.createObjectURL(new Blob([JSON.stringify(clean,null,2)], {type:'application/json'}));
+        const link=document.createElement('a'); link.href=url; link.download='ai-treemap-data.json'; link.click();
+        setTimeout(() => URL.revokeObjectURL(url),1000);
+        $('status').textContent='已导出数据；修改不会自动保存。';
+      } catch (error) { $('status').textContent='导出失败：'+error.message; }
+    });
+    $('import').addEventListener('change', async event => {
+      const file=event.target.files[0];
+      if (!file) return;
+      try {
+        const candidate=validate(JSON.parse(await file.text()));
+        data=candidate; renderAll(); $('status').textContent='已导入数据；修改不会自动保存。';
+      } catch (error) { $('status').textContent='导入失败：'+error.message; }
+      event.target.value='';
+    });
+    new ResizeObserver(() => renderMap()).observe($('map'));
+    renderAll();
+  })();
+  </script>
+</body>
+</html>
